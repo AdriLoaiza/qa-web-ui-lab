@@ -19,6 +19,12 @@ def flight_search_url() -> str:
 
 
 @pytest.fixture(scope="session")
-def browser_type_launch_args(browser_type_launch_args):
-    """Fuerza modo headless (sobre-escribible con --headed en CLI)."""
-    return {**browser_type_launch_args, "headless": True}
+def browser_type_launch_args(browser_type_launch_args, pytestconfig):
+    """Por defecto corre headless; respeta --headed si se pasa en la CLI.
+
+    pytest-playwright expone la opción --headed. Solo forzamos headless
+    cuando el usuario NO pidió explícitamente modo headed, de modo que
+    `pytest ... --headed` sí abra el navegador visible.
+    """
+    headed = pytestconfig.getoption("--headed", default=False)
+    return {**browser_type_launch_args, "headless": not headed}
